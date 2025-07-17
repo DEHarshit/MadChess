@@ -1,14 +1,16 @@
-
-
-
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.util.*;
 
 public class Main {
+
     public static void main(String[] args) {
 
-        System.out.print("Hello and welcome!");
+        Game game = new Game("Player1","Player2");
+        game.beginGame();
 
-        for (int i = 1; i <= 5; i++) {
-            System.out.println("i = " + i);
-        }
+
     }
 }
