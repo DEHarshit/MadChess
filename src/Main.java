@@ -11,6 +11,5 @@ public class Main {
         Game game = new Game("Player1","Player2");
         game.beginGame();
 
-
     }
 }

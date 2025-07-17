@@ -100,18 +100,54 @@ public class Game {
                 } else if (selectedTile[0]!=null && boardMatrix[selectedTile[0].x][selectedTile[0].y] !=0) {
                     int piece = boardMatrix[selectedTile[0].x][selectedTile[0].y];
                     int tile = boardMatrix[finalI][finalJ];
-                    if(board.movePiece(selectedTile[0].x,selectedTile[0].y,finalI,finalJ)){
-                        // double click makes piece disappear, set capture rules i.e. white cant capture itself
-                        refreshBoard(finalI,finalJ,piece);
-                        selectedTile[0] = null;
+                    if((tile>0 && piece > 0) || (tile<0 && piece < 0)){ // double click makes piece disappear, set capture rules i.e. white cant capture itself
+                        if(boardMatrix[finalI][finalJ]!=0){
+                            selectedTile[0] = new Point(finalI, finalJ);
+                            System.out.println("Selected New Piece");
+                        }
                     }
+                    else {
+                        if(board.movePiece(selectedTile[0].x,selectedTile[0].y,finalI,finalJ)){
+                            System.out.println("Selected Move");
+                            //movePiece(finalI,finalJ,piece);
+                            refreshBoard();
+                            selectedTile[0] = null;
+                        }
+                        else {
+                            System.out.println("False Move");
 
+                            /*if(boardMatrix[finalI][finalJ]!=0){
+                                selectedTile[0] = new Point(finalI, finalJ);
+                                System.out.println("Selected New Piece");
+                            }*/
+                        }
+                    }
                 }
             }
         });
     }
 
-    private void refreshBoard(int dx,int dy,int piece){
+    public void refreshBoard(){
+        Component[] components = boardPanel.getComponents();
+        int x =0;
+        int y =0;
+        boardMatrix = board.getBoard();
+        for(int i =0;i<64;i++){
+            if(y>7) {
+                y = 0;
+                x += 1;
+            }
+            JLabel tile = (JLabel) components[i];
+            tile.setIcon(null);
+            int piece = boardMatrix[x][y];
+            if(piece !=0){
+                tile.setIcon(iconMap.get(piece));
+            }
+            y+=1;
+        }
+    }
+
+    private void movePiece(int dx,int dy,int piece){
         int x = selectedTile[0].x;
         int y = selectedTile[0].y;
 
