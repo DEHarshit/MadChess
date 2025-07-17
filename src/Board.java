@@ -212,7 +212,7 @@ public class Board {
                 }
             }
         }
-        else if( (abs(dx - x) == 1 && y == dy) || (abs(dy-y) == 1 && x == dx) || (abs(dx-x) == 1 && abs(dy-y) == 1) ){
+        if( (abs(dx - x) == 1 && y == dy) || (abs(dy-y) == 1 && x == dx) || (abs(dx-x) == 1 && abs(dy-y) == 1) ){
             kingMoved = true;
             return true;
         }
