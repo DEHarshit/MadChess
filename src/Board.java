@@ -1,11 +1,127 @@
+import java.io.IOException;
 import java.util.Arrays;
 
 import static java.lang.Math.abs;
+import javax.sound.sampled.*;
+import java.util.Objects;
 
 public class Board {
     public String player1;
     public String player2;
-    private boolean kingMoved;
+    private boolean bKingMoved;
+    private boolean wKingMoved;
+    private boolean castle;
+    private boolean capture;
+
+    public void playSound(String sound){
+        switch(sound){
+            case "move":
+                try {
+                    System.out.println("Playing sound");
+                    AudioInputStream audioIn = AudioSystem.getAudioInputStream(
+                            Objects.requireNonNull(getClass().getResource("/assets/sounds/move-self.wav"))
+                    );
+                    Clip clip = AudioSystem.getClip();
+                    clip.open(audioIn);
+                    clip.start();
+                    clip.addLineListener(event -> {
+                        if (event.getType() == LineEvent.Type.STOP) {
+                            clip.close();
+                            try {
+                                audioIn.close();
+                            } catch (Exception ignored) {}
+                        }
+                    });
+                } catch (Exception e){
+                    throw new RuntimeException(e);
+                }
+                break;
+            case "castle":
+                try {
+                    System.out.println("Playing sound");
+                    AudioInputStream audioIn = AudioSystem.getAudioInputStream(
+                            Objects.requireNonNull(getClass().getResource("/assets/sounds/castle.wav"))
+                    );
+                    Clip clip = AudioSystem.getClip();
+                    clip.open(audioIn);
+                    clip.start();
+                    clip.addLineListener(event -> {
+                        if (event.getType() == LineEvent.Type.STOP) {
+                            clip.close();
+                            try {
+                                audioIn.close();
+                            } catch (Exception ignored) {}
+                        }
+                    });
+                } catch (Exception e){
+                    throw new RuntimeException(e);
+                }
+                break;
+            case "promote":
+                try {
+                    System.out.println("Playing sound");
+                    AudioInputStream audioIn = AudioSystem.getAudioInputStream(
+                            Objects.requireNonNull(getClass().getResource("/assets/sounds/promote.wav"))
+                    );
+                    Clip clip = AudioSystem.getClip();
+                    clip.open(audioIn);
+                    clip.start();
+                    clip.addLineListener(event -> {
+                        if (event.getType() == LineEvent.Type.STOP) {
+                            clip.close();
+                            try {
+                                audioIn.close();
+                            } catch (Exception ignored) {}
+                        }
+                    });
+                } catch (Exception e){
+                    throw new RuntimeException(e);
+                }
+                break;
+            case "capture":
+                try {
+                    System.out.println("Playing sound");
+                    AudioInputStream audioIn = AudioSystem.getAudioInputStream(
+                            Objects.requireNonNull(getClass().getResource("/assets/sounds/capture.wav"))
+                    );
+                    Clip clip = AudioSystem.getClip();
+                    clip.open(audioIn);
+                    clip.start();
+                    clip.addLineListener(event -> {
+                        if (event.getType() == LineEvent.Type.STOP) {
+                            clip.close();
+                            try {
+                                audioIn.close();
+                            } catch (Exception ignored) {}
+                        }
+                    });
+                } catch (Exception e){
+                    throw new RuntimeException(e);
+                }
+                break;
+            case "win":
+                try {
+                    System.out.println("Playing sound");
+                    AudioInputStream audioIn = AudioSystem.getAudioInputStream(
+                            Objects.requireNonNull(getClass().getResource("/assets/sounds/notify.wav"))
+                    );
+                    Clip clip = AudioSystem.getClip();
+                    clip.open(audioIn);
+                    clip.start();
+                    clip.addLineListener(event -> {
+                        if (event.getType() == LineEvent.Type.STOP) {
+                            clip.close();
+                            try {
+                                audioIn.close();
+                            } catch (Exception ignored) {}
+                        }
+                    });
+                } catch (Exception e){
+                    throw new RuntimeException(e);
+                }
+                break;
+        }
+    }
 
     public enum Piece {
         PAWN(1), KNIGHT(2), BISHOP(3), ROOK(5), QUEEN(9), KING(10);
@@ -37,7 +153,8 @@ public class Board {
     Board( String player1, String player2){
         this.player1 = player1;
         this.player2 = player2;
-        this.kingMoved = false;
+        this.bKingMoved = false;
+        this.wKingMoved = false;
     }
 
     public void beginGame(){
@@ -195,25 +312,40 @@ public class Board {
 
     private boolean kingMove(int x,int y,int dx, int dy){
         int piece = board[x][y];
-        if( (x == 0 || x ==7) &&  y ==4 && !kingMoved) { // castling black
+        boolean kingMove = piece > 0 ? bKingMoved : wKingMoved;
+        if( (x == 0 || x ==7) &&  y ==4 && !kingMove) {
             if (dy == 2) {
                 if (board[x][3] == 0 && board[x][2] == 0 && board[x][1] == 0 && abs(board[x][0]) == 5) {
                     board[x][0] = 0;
                     board[x][3] = piece > 0 ? 5 : -5;
-                    kingMoved = true;
+                    if (piece > 0){
+                        bKingMoved = true;
+                    } else {
+                        wKingMoved = true;
+                    }
+                    castle = true;
                     return true;
                 }
             } else if (dy == 6) {
                 if(board[x][5] == 0 && board[x][6] == 0 && abs(board[x][7]) == 5){
                     board[x][7] = 0;
                     board[x][5] = piece > 0 ? 5 : -5;
-                    kingMoved = true;
+                    if (piece > 0){
+                        bKingMoved = true;
+                    } else {
+                        wKingMoved = true;
+                    }
+                    castle = true;
                     return true;
                 }
             }
         }
         if( (abs(dx - x) == 1 && y == dy) || (abs(dy-y) == 1 && x == dx) || (abs(dx-x) == 1 && abs(dy-y) == 1) ){
-            kingMoved = true;
+            if (piece > 0){
+                bKingMoved = true;
+            } else {
+                wKingMoved = true;
+            }
             return true;
         }
         return false;
@@ -223,8 +355,18 @@ public class Board {
         return this.board;
     }
 
-    public boolean movePiece(int x, int y, int dx, int dy){
+    public int movePiece(int x, int y, int dx, int dy, int currentPiece, boolean isBlack){
+
         int piece = board[x][y];
+        if(piece > 0 && !isBlack){
+            return 0;
+        }
+        if(piece <0 && isBlack){
+            return 0;
+        }
+        if(currentPiece != piece){
+            return 0;
+        }
         boolean swap = false;
         switch(abs(piece)){
             case 1: // pawn
@@ -285,13 +427,28 @@ public class Board {
         if(swap){
             if((piece == -1 && dx == 0) || (piece == 1 && dx == 7)) {
                 piece = piece>0 ? 9 : -9;
+                playSound("promote");
+            } else if (board[dx][dy]!=0 && abs(board[dx][dy]) != 10) {
+                playSound("capture");
+            }   else if(castle){
+                castle = false;
+                playSound("castle");
+            }  else if(abs(board[dx][dy]) == 10){
+                playSound("win");
+            }else {
+                playSound("move");
+            }
+            if(abs(board[dx][dy])==10){
+                board[x][y] = 0;
+                board[dx][dy] = piece;
+                return 2;
             }
             board[x][y] = 0;
             board[dx][dy] = piece;
             beginGame();
-            return true;
+            return 1;
         }
-        return false;
+        return 0;
     }
 
 }
