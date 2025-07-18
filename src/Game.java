@@ -5,6 +5,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.IOException;
 import java.util.*;
 
 public class Game {
@@ -265,6 +266,11 @@ public class Game {
                             JOptionPane.showMessageDialog(frame, winner + " won!", "Game Over", JOptionPane.INFORMATION_MESSAGE);
                             frame.setVisible(false);
                             menu.setVisible(true);
+                            try {
+                                server.stop(menu);
+                            } catch (IOException ex) {
+                                throw new RuntimeException(ex);
+                            }
                             game = null;
                         } else {
                             System.out.println("False Move");
@@ -403,6 +409,11 @@ public class Game {
             JOptionPane.showMessageDialog(frame, winner + " won!", "Game Over", JOptionPane.INFORMATION_MESSAGE);
             frame.setVisible(false);
             menu.setVisible(true);
+            try {
+                server.stop(menu);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
             game = null;
         }
     }
