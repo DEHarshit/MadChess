@@ -11,6 +11,8 @@ public class Menu {
     private final JLabel hostBackground = new JLabel();
     private final JLabel joinBackground = new JLabel();
 
+    private final JLabel menuText = new JLabel();
+
     private final JLayeredPane mainMenu = new JLayeredPane();
     private final JLayeredPane hostMenu = new JLayeredPane();
     private final JLayeredPane joinMenu = new JLayeredPane();
@@ -36,6 +38,7 @@ public class Menu {
 
     private Server server;
     private Game game;
+    private Client client;
 
     public Menu() {
         originalBackgroundImage = new ImageIcon(Objects.requireNonNull(Menu.class.getResource("/assets/Background.jpg"))).getImage();
@@ -52,8 +55,17 @@ public class Menu {
         mainMenu.setLayout(null);
         menuBackground.setOpaque(true);
         mainMenu.add(menuBackground, JLayeredPane.DEFAULT_LAYER);
+
+
         createButton(hostButton);
         createButton(joinButton);
+
+        menuText.setText("MAD CHESS");
+        menuText.setFont(new Font("Comic Sans MS", Font.BOLD, 110));
+        menuText.setVisible(true);
+
+        mainMenu.add(menuText, JLayeredPane.PALETTE_LAYER);
+
         hostButton.addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
@@ -152,18 +164,24 @@ public class Menu {
             @Override
             public void mousePressed(MouseEvent e) {
                 ipAddress = ipInputField.getText();
-                new Thread(() -> {
-                    try {
-                        Client client = new Client();
-                        game = new Game("Player1", "Player2");
-                        game.setClient(client);
-                        client.start(ipAddress, 1200, game, menu);
-                    } catch (IOException ex) {
-                        //SwingUtilities.invokeLater(() -> {
-                       //     JOptionPane.showMessageDialog(menu, "Failed to connect to server.\nIs it running at " + ipAddress + "?", "Connection Error", JOptionPane.ERROR_MESSAGE);
-                        //});
-                    }
-                }).start();
+                if(client !=null && client.isRunning){
+                    return;
+
+                }
+                try {
+                    client = new Client();
+                    game = new Game("Player1", "Player2");
+                    game.setClient(client);
+                    client.start(ipAddress, 1200, game, menu);
+                    connectButton.setEnabled(false);
+                } catch (IOException ex) {
+                    //SwingUtilities.invokeLater(() -> {
+                    //     JOptionPane.showMessageDialog(menu, "Failed to connect to server.\nIs it running at " + ipAddress + "?", "Connection Error", JOptionPane.ERROR_MESSAGE);
+                    //});
+                } finally {
+                    client.isRunning=false;
+                    connectButton.setEnabled(true);
+                }
 
             }
         });
@@ -227,6 +245,12 @@ public class Menu {
 
         hostButton.setBounds(centerX, startY, buttonWidth, buttonHeight);
         joinButton.setBounds(centerX, startY + 70, buttonWidth, buttonHeight);
+
+        int textWidth = 690;
+        int textHeight = 97;
+        int textX = width / 2 - textWidth / 2;
+        int textY = startY - 150;
+        menuText.setBounds(textX, textY, textWidth, textHeight);
     }
 
     private void resizeHostComponents() {

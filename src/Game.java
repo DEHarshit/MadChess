@@ -1,8 +1,6 @@
 import javax.swing.*;
 import javax.swing.Timer;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
@@ -10,7 +8,7 @@ import java.util.*;
 
 public class Game {
 
-    private int tileSize=60;
+    private final int tileSize=60;
     private final int cooldown = 15000;
     Server server;
     Client client;
@@ -42,8 +40,8 @@ public class Game {
     private JPanel boardPanel;
     public int[][] boardMatrix;
     final private Point[] selectedTile = {null};
-    private String player1;
-    private String player2;
+    private final String player1;
+    private final String player2;
     private Map<JPanel, Long> lastClicked = new HashMap<>();
     private Map<JPanel, Timer> cooldownTimers = new HashMap<>();
 
@@ -124,7 +122,7 @@ public class Game {
                     initialCooldown.setVisible(false);
                     initialTimer.stop();
                 } else {
-                    initialCooldown.setBounds((int) (0), (int) (tileSize - constant * remainingTime[0]), tileSize, tileSize);
+                    initialCooldown.setBounds(0, (int) (tileSize - constant * remainingTime[0]), tileSize, tileSize);
                     remainingTime[0]--;
                 }});
 
@@ -163,7 +161,6 @@ public class Game {
                     }
 
                 } else if (selectedTile[0] != null && boardMatrix[selectedTile[0].x][selectedTile[0].y] != 0) {
-                        int piece = boardMatrix[selectedTile[0].x][selectedTile[0].y];
                         int tile = boardMatrix[finalI][finalJ];
                         if ((isBlack && tile > 0) || (!isBlack && tile < 0)) { // double click makes piece disappear, set capture rules i.e. white cant capture itself
 
@@ -238,7 +235,7 @@ public class Game {
                                     cooldownOverlay.setVisible(false);
                                     timer.stop();
                                 } else {
-                                    cooldownOverlay.setBounds((int) (0), (int) (tileSize - constant * timeLeft[0]), tileSize, tileSize);
+                                    cooldownOverlay.setBounds(0, (int) (tileSize - constant * timeLeft[0]), tileSize, tileSize);
                                     timeLeft[0]--;
                                 }
                             });

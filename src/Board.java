@@ -438,10 +438,14 @@ public class Board {
             }else {
                 playSound("move");
             }
-            if(abs(board[dx][dy])==10){
+            if(board[dx][dy]==10){
                 board[x][y] = 0;
                 board[dx][dy] = piece;
                 return 2;
+            } else if (board[dx][dy] == -10){
+                board[x][y] = 0;
+                board[dx][dy] = piece;
+                return 3;
             }
             board[x][y] = 0;
             board[dx][dy] = piece;

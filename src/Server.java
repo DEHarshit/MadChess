@@ -13,42 +13,44 @@ public class Server {
 
     public void start(int port, Game game, JFrame menu) throws IOException {
         serverSocket = new ServerSocket(port);
+        if(!isRunning){
+            acceptThread = new Thread(() -> {
+                try {
+                    System.out.println("Server started. Waiting for client...");
+                    clientSocket = serverSocket.accept(); // Will block here
+                    System.out.println("Client connected.");
+
+                    in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+                    out = new PrintWriter(clientSocket.getOutputStream(), true);
+
+                    SwingUtilities.invokeLater(() -> {
+                        menu.setVisible(false);
+                        game.beginGame("Player1",menu,game);
+                    });
+
+                    String move;
+                    while ((move = in.readLine()) != null) {
+                        System.out.println("Received: " + move);
+                        String[] parts = move.split(",");
+                        int x = Integer.parseInt(parts[0]);
+                        int y = Integer.parseInt(parts[1]);
+                        int dx = Integer.parseInt(parts[2]);
+                        int dy = Integer.parseInt(parts[3]);
+                        int piece = Integer.parseInt(parts[4]);
+                        game.makeMove(x, y, dx, dy, "Player1", piece,true);
+                    }
+                } catch (IOException e) {
+                    if (isRunning) {
+                        e.printStackTrace();
+                    } else {
+                        System.out.println("Server stopped before client connected.");
+                        isRunning=false;
+                    }
+                }
+            });
+            acceptThread.start();
+        }
         isRunning = true;
-
-        acceptThread = new Thread(() -> {
-            try {
-                System.out.println("Server started. Waiting for client...");
-                clientSocket = serverSocket.accept(); // Will block here
-                System.out.println("Client connected.");
-
-                in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-                out = new PrintWriter(clientSocket.getOutputStream(), true);
-
-                SwingUtilities.invokeLater(() -> {
-                    menu.setVisible(false);
-                    game.beginGame("Player1",menu,game);
-                });
-
-                String move;
-                while ((move = in.readLine()) != null) {
-                    System.out.println("Received: " + move);
-                    String[] parts = move.split(",");
-                    int x = Integer.parseInt(parts[0]);
-                    int y = Integer.parseInt(parts[1]);
-                    int dx = Integer.parseInt(parts[2]);
-                    int dy = Integer.parseInt(parts[3]);
-                    int piece = Integer.parseInt(parts[4]);
-                    game.makeMove(x, y, dx, dy, "Player1", piece,true);
-                }
-            } catch (IOException e) {
-                if (isRunning) {
-                    e.printStackTrace();
-                } else {
-                    System.out.println("Server stopped before client connected.");
-                }
-            }
-        });
-        acceptThread.start();
     }
 
     public void sendMove(int x, int y, int dx, int dy, int piece) {
