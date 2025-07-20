@@ -9,6 +9,7 @@ public class Board {
     public String player1;
     public String player2;
     private boolean bKingMoved;
+
     private boolean wKingMoved;
     private boolean castle;
     private boolean capture;

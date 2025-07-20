@@ -13,6 +13,7 @@ public class Client {
         if(!isRunning){
             new Thread(()->{
                 try {
+                    isRunning = true;
                     socket = new Socket(ip, port);
                     System.out.println("Connected to server.");
 
@@ -45,10 +46,11 @@ public class Client {
                     }).start();
                 } catch (IOException e) {
                     throw new RuntimeException(e);
+                } finally {
+                    isRunning = false;
                 }
 
             }).start();
-            isRunning = true;
         } else {
             stop();
         }
